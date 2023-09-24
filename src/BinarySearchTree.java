@@ -35,7 +35,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
          * Constructs a new Node<K> with the given values for fields.
          */
         public Node(K data, Node<K> left, Node<K> right) {
-
+            // delete this line and add your code
         }
 
         /*
@@ -61,7 +61,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
          * actually changed. This function *must* run in O(1) time.
          */
         protected boolean updateHeight() {
-            return true;
+            return true;  // delete this line and add your code
         }
 
         /**
@@ -72,7 +72,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
          */
         @Override
         public Location<K> previous() {
-            return null;
+            return null;  // delete this line and add your code
         }
 
         /**
@@ -83,7 +83,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
          */
         @Override
         public Location<K> next() {
-            return null;
+            return null;  // delete this line and add your code
         }
 
         public boolean isAVL() {
@@ -118,7 +118,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      * location containing the key.
      */
     public Node<K> search(K key) {
-        return null;
+        return null;  // delete this line and add your code
     }
 
     /**
@@ -127,7 +127,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      * Returns the height of this tree. Runs in O(1) time!
      */
     public int height() {
-        return 0;
+        return 0;  // delete this line and add your code
     }
 
     /**
@@ -136,7 +136,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      * Clears all the keys from this tree. Runs in O(1) time!
      */
     public void clear() {
-
+        // delete this line and add your code
     }
 
     /**
@@ -162,7 +162,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      * Node<K> containing the key), or null if the key is already present.
      */
     public Node<K> insert(K key) {
-        return null;
+        return null;  // delete this line and add your code
     }
 
     /**
@@ -187,14 +187,14 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      * nothing happens.
      */
     public void remove(K key) {
-
+        // delete this line and add your code
     }
 
     /**
      * TODO * <p> * Returns a sorted list of all the keys in this tree.
      */
     public List<K> keys() {
-        return null;
+        return null;  // delete this line and add your code
     }
 
     static private <K> String toStringPreorder(Node<K> p) {
