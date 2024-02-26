@@ -1,9 +1,10 @@
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
 /**
- * TODO: This is your first major task.
+ * This is your first major task.
  * <p>
  * This class implements a generic unbalanced binary search tree (BST).
  */
@@ -30,12 +31,14 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
         }
 
         /**
-         * TODO
+         *
          * <p>
          * Constructs a new Node<K> with the given values for fields.
          */
         public Node(K data, Node<K> left, Node<K> right) {
-            // delete this line and add your code
+            this.data = data;
+            this.left = left;
+            this.right = right;
         }
 
         /*
@@ -54,36 +57,64 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
         }
 
         /**
-         * TODO
+         *
          * <p>
          * Performs a local update on the height of this Node<K>. Assumes that the
          * heights in the child Node<K>s are correct. Returns true iff the height
          * actually changed. This function *must* run in O(1) time.
          */
         protected boolean updateHeight() {
-            return true;  // delete this line and add your code
+            int l = 0,r = 0;
+            if (left != null) l = left.height;
+            if (right != null) r = right.height;
+            int nh = Math.max(l, r) + 1;
+            boolean updated = (nh != height);
+            height = nh;
+            return (updated);
         }
 
         /**
-         * TODO
+         *
          * <p>
          * Returns the location of the Node<K> containing the inorder predecessor
          * of this Node<K>.
          */
         @Override
         public Location<K> previous() {
-            return null;  // delete this line and add your code
+            if(left != null) return left.last();
+            return prevAncestor();
+        }
+
+        private Location<K> last() {
+            if (right != null) return left.last();
+            return this;
+        }
+
+        private Location<K> prevAncestor() {
+            if (parent != null && parent.left == this) return parent.prevAncestor();
+            return parent;
         }
 
         /**
-         * TODO
+         *
          * <p>
          * Returns the location of the Node<K> containing the inorder successor
          * of this Node<K>.
          */
         @Override
         public Location<K> next() {
-            return null;  // delete this line and add your code
+            if (right != null) return right.first();
+            return nextAncestor();
+        }
+
+        private Location<K> first() {
+            if (left != null) return left.first();
+            return this;
+        }
+
+        public Location<K> nextAncestor() {
+            if (parent != null && parent.right == this) return parent.nextAncestor();
+            return parent;
         }
 
         public boolean isAVL() {
@@ -112,31 +143,44 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
     }
 
     /**
-     * TODO
+     *
      * <p>
      * Looks up the key in this tree and, if found, returns the
      * location containing the key.
+     *
+     * Can we assume key is an integer? Do we need a lessThan function?
      */
     public Node<K> search(K key) {
-        return null;  // delete this line and add your code
+        Node<K> n = find(key, root, null);
+        if (n == null) return null;
+        if (n.get() == key) return n;
+        return null;
+    }
+
+
+    protected Node<K> find(K key, Node<K> curr, Node<K> parent) {
+        if (curr == null) return parent;
+        if (lessThan.test(key, curr.data)) return find(key, curr.left, curr);
+        if (lessThan.test(curr.data, key)) return find(key, curr.right, curr);
+        return curr;
     }
 
     /**
-     * TODO
+     *
      * <p>
      * Returns the height of this tree. Runs in O(1) time!
      */
     public int height() {
-        return 0;  // delete this line and add your code
+        return get_height(root);
     }
 
     /**
-     * TODO
+     *
      * <p>
      * Clears all the keys from this tree. Runs in O(1) time!
      */
     public void clear() {
-        // delete this line and add your code
+        root = null;
     }
 
     /**
@@ -147,7 +191,6 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
     }
 
     /**
-     * TODO
      * <p>
      * Inserts the given key into this BST, as a leaf, where the path
      * to the leaf is determined by the predicate provided to the tree
@@ -162,7 +205,37 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      * Node<K> containing the key), or null if the key is already present.
      */
     public Node<K> insert(K key) {
-        return null;  // delete this line and add your code
+        Node<K> n = find(key, root, null);
+        if (n == null){
+            root = new Node<K>(key);
+            numNodes++;
+            updateHeightUp(root);
+            return root;
+        }
+        if (n.get() == key) return null;
+        if (lessThan.test(key, n.data)) {
+            Node<K> x = new Node<K>(key);
+            n.left = x;
+            x.parent = n;
+            numNodes++;
+
+            updateHeightUp(x);
+            return x;
+        }
+        if (lessThan.test(n.data, key)) {
+            Node<K> x = new Node<K>(key);
+            n.right = x;
+            x.parent = n;
+            numNodes++;
+
+            updateHeightUp(x);
+            return x;
+        }
+        return null;
+    }
+
+    private void updateHeightUp(Node<K> x) {
+        if(x.updateHeight() && x.parent != null) updateHeightUp(x.parent);
     }
 
     /**
@@ -177,25 +250,72 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      */
     public boolean contains(K key) {
         Node<K> p = search(key);
-        return p != null;
+        return (p != null);
     }
 
     /**
-     * TODO
+     *
      * <p>
      * Removes the key from this BST. If the key is not in the tree,
      * nothing happens.
      */
     public void remove(K key) {
-        // delete this line and add your code
+        root = remove_helper(root, key);
+
     }
 
+    private Node<K> remove_helper(Node<K> curr, K key) {
+        if (curr == null) return null;
+        if (lessThan.test(key, curr.data)) { // remove in left subtree
+            curr.left = remove_helper(curr.left, key);
+            return curr;
+        }
+        if (lessThan.test(curr.data, key)) { // remove in right subtree
+            curr.right = remove_helper(curr.right, key);
+            return curr;
+        }
+        // remove this node
+        if (curr.get() == key) {
+            numNodes--;
+            // if node to be deleted has an empty child, overwrite current node to the other child.
+            if (curr.left == null && curr.right == null) return null;
+            if (curr.left == null) {
+                if (curr.parent != null) {curr.right.parent = curr.parent;}
+                updateHeightUp(curr.right);
+                return curr.right;
+            }
+            if (curr.right == null) {
+                if (curr.parent != null) {curr.left.parent = curr.parent;}
+                updateHeightUp(curr.left);
+                return curr.left;
+            }
+            numNodes++;
+            // Otherwise two children
+            Location<K> min = curr.right.first();
+            //Node<K> min = curr.right.first();
+            curr.data = min.get();
+            curr.right = remove_helper(curr.right, min.get());
+            return curr;
+        }
+        return curr;
+    }
     /**
-     * TODO * <p> * Returns a sorted list of all the keys in this tree.
+     *  * <p> * Returns a sorted list of all the keys in this tree.
      */
     public List<K> keys() {
-        return null;  // delete this line and add your code
+        List<K> keys = new ArrayList<>();
+        inOrderTraversal(root, keys);
+        return keys;
     }
+
+    private void inOrderTraversal(Node<K> x, List<K> keys) {
+        if (x == null) return;
+        inOrderTraversal(x.left, keys);
+        keys.add(x.data);
+        inOrderTraversal(x.right, keys);
+    }
+
+
 
     static private <K> String toStringPreorder(Node<K> p) {
         if (p == null) return ".";
