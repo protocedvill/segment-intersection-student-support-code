@@ -64,11 +64,11 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
          * actually changed. This function *must* run in O(1) time.
          */
         protected boolean updateHeight() {
-            int l = 0,r = 0;
+            int l = -1,r = -1;
             if (left != null) l = left.height;
             if (right != null) r = right.height;
             int nh = Math.max(l, r) + 1;
-            boolean updated = (nh != height);
+            boolean updated = (true);//todo
             height = nh;
             return (updated);
         }
@@ -86,7 +86,7 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
         }
 
         private Location<K> last() {
-            if (right != null) return left.last();
+            if (right != null) return right.last();
             return this;
         }
 
@@ -148,20 +148,28 @@ public class BinarySearchTree<K> implements OrderedSet<K> {
      * Looks up the key in this tree and, if found, returns the
      * location containing the key.
      *
-     * Can we assume key is an integer? Do we need a lessThan function?
+     *
      */
     public Node<K> search(K key) {
         Node<K> n = find(key, root, null);
         if (n == null) return null;
-        if (n.get() == key) return n;
-        return null;
+        if(n.get() != key) return null;
+        return n;
     }
 
-
+    /**
+     * Looks up the location of where an item SHOULD be and returns it. If it can't find the item it will return the parent of it's intended location.
+     * @param key
+     * @param curr
+     * @param parent
+     * @return
+     */
     protected Node<K> find(K key, Node<K> curr, Node<K> parent) {
-        if (curr == null) return parent;
-        if (lessThan.test(key, curr.data)) return find(key, curr.left, curr);
-        if (lessThan.test(curr.data, key)) return find(key, curr.right, curr);
+        if (curr == null && parent != null) return parent;
+        if (curr == null) return null;
+        if (curr.get() == key) return curr;
+        if (lessThan.test(key, curr.get())) return find(key, curr.left, curr);
+        if (lessThan.test(curr.get(), key)) return find(key, curr.right, curr);
         return curr;
     }
 

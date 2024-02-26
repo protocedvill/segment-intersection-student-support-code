@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import java.util.Random;
 
-import static java.lang.Math.log;
 
 public class StudentTest {
 
@@ -32,6 +31,22 @@ public class StudentTest {
     }
 
     @Test
+    public void insertSmallBSTDemo() {
+        BinarySearchTree<Integer> bst = new BinarySearchTree<>((Integer x, Integer y) -> x < y);
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        int[] a = new int[]{12, 3, 10, 6, 7, 1, 0, 9};
+
+
+        for (Integer key : a) {
+            bst.insert(key);
+            map.put(key, key);
+        }
+        for (int i = 0; i != 11; ++i) {
+            assertEquals(bst.contains(i), map.containsKey(i));
+        }
+    }
+
+    @Test
     public void deleteSmallBST() {
         BinarySearchTree<Integer> bst = new BinarySearchTree<>((Integer x, Integer y) -> x < y);
         TreeMap<Integer, Integer> map = new TreeMap<>();
@@ -48,22 +63,70 @@ public class StudentTest {
             map.remove(key, key);
         }
 
-        for (int i = 0; i != 11; ++i) {
+        for (int i = 0; i != 20; ++i) {
             assertEquals(bst.contains(i), map.containsKey(i));
         }
 
         assertEquals(bst.numNodes, 3);
-        System.out.println(bst.keys());
+        //System.out.println(bst.keys());
 
     }
 
-    /**
-     * TODO: Test cases
-     */
+    @Test
+    public void largeRandomBST() {
+        BinarySearchTree<Integer> bst = new BinarySearchTree<>((Integer x, Integer y) -> x < y);
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+
+        Random r = new Random();
+        int[] a = new int[10000];
+        for (int x : a) {
+            x = r.nextInt();
+            bst.insert(x);
+            map.put(x, x);
+        }
+
+        for (int x : a) {
+            assertEquals(bst.contains(x), map.containsKey(x));
+        }
+
+        assertTrue(validateSorted(bst));
+    }
+
+    protected boolean validateSorted(BinarySearchTree<Integer> bst) {
+        Integer prevKey = bst.keys().get(0) - 1;
+        for (int key : bst.keys()) {
+            if(key <= prevKey) return false;
+            prevKey = key;
+        }
+        return true;
+    }
+
+    @Test
+    public void AVLBalanced() {
+        AVLTree<Integer> bst = new AVLTree<>((Integer x, Integer y) -> x < y);
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+
+        Random r = new Random();
+        int[] a = new int[1000];
+        for (int x : a) {
+            x = r.nextInt();
+            bst.insert(x);
+            map.put(x, x);
+        }
+
+        for (int x : a) {
+            assertTrue(bst.isAVL());
+            assertTrue(validateSorted(bst));
+            assertEquals(bst.contains(x), map.containsKey(x));
+        }
+    }
+
     @Test
     public void test() {
         insertSmallBST();
         deleteSmallBST();
+        largeRandomBST();
+        AVLBalanced();
         // your tests go here
     }
 
