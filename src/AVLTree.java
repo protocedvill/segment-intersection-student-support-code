@@ -34,61 +34,123 @@ public class AVLTree<K> extends BinarySearchTree<K> {
      * maintained.
      */
     public Node insert(K key) {
-        Node location = super.insert(key);
+        Node<K> location = super.insert(key);
 
-        // If after insert it is AVL, then don't worry.
-        //if(!isAVL()) balanceTree(location);
+        propagateBalance(location);
 
         return location;
+    }
+
+    // If it needed to be balanced, return true. It will balance if needed.
+    protected boolean propagateBalance(Node<K> n) {
+        if (n == null) return false;
+        if (!n.isAVL()) {
+            balanceTree(n);
+            propagateBalance(n.parent);
+            return (true);
+        }
+        return propagateBalance(n.parent);
+
     }
 
     // Balance the tree, from upwards. Assume everything below the given node is balanced.
     // Check if there are children.
     protected Node<K> balanceTree(Node<K> curr) {
-        if (curr.left.height <= curr.right.height) {
-            if (curr.right.left.height <= curr.right.right.height) {
-
+        if (curr == null) return curr;
+        if (get_height(curr.left) - get_height(curr.right) > 1) {
+            if (curr.right == null) {
+                curr = leftRotate(curr);
             }
-            if (curr.right.left.height > curr.right.right.height) {
-
+            if (curr.left == null) {
+                curr = doubleLeftRotate(curr);
             }
-
+            if(get_height(curr.left.left) >= get_height(curr.right.left)) {
+                curr = leftRotate(curr);
+            }
+            else curr = doubleLeftRotate(curr);
         }
-        return null;
+        if (get_height(curr.right) - get_height(curr.left) > 1) {
+            if (get_height(curr.right.right) >= get_height(curr.right.left)) {
+                curr = rightRotate(curr);
+            }
+            else curr = doubleRightRotate(curr);
+        }
+        return curr;
     }
 
-    protected Node<K> rightRotate(Node<K> n) {
-        Node<K> newRoot = new Node<K>(n.get(),n.left.left,n);
-        newRoot.parent = n.parent;
-        newRoot.left.parent = newRoot;
-        newRoot.right.parent = newRoot;
+    protected Node<K> rightRotate(Node<K> x) {
+        Node<K> k1 = x;
+        Node<K> k2 = x.right.left;
+        Node<K> k3 = x.right;
 
-        n.left = n.left.right;
-        n.left.parent = n.parent;
+        //Shuffle B
+        if(x.right != null && x.left != null) k1.left = x.right.left.right;
+        else k1 = null;
+        if(k1 != null && k1.left != null) k1.left.parent = k1;
 
-        newRoot.left.updateHeight();
-        newRoot.right.left.updateHeight();
-        newRoot.right.right.updateHeight();
+        //Shuffle C
+        if(x.right != null && x.right.left != null) k3.right = x.right.left.left;
+        if(k3.right != null) k3.right.parent = k3;
 
-        n = null;
-        return newRoot;
+        // Shuffle k2
+        if (k2 != null) k2.left = k1;
+        if(k2 != null && k1 != null) k1.parent = k2;
+        if(k2 != null) k2.right = k3;
+        if(k2 != null && k3 != null) k3.parent = k2;
+
+
+        if(k1 != null && k1.right != null) k1.right.updateHeight();
+        if(k1 != null && k1.left != null) k1.left.updateHeight();
+        if(k3.left != null) k3.left.updateHeight();
+        if(k3.right != null) k3.right.updateHeight();
+
+        k1.updateHeight();
+        k3.updateHeight();
+
+        updateHeightUp(k2);
+        return k2;
+    }
+
+    protected Node<K> doubleLeftRotate(Node<K> x) {
+        x.left = rightRotate(x.left);
+        return leftRotate(x);
+    }
+
+    protected Node<K> doubleRightRotate(Node<K> x) {
+        x.right = leftRotate(x.right);
+        return rightRotate(x);
     }
 
     protected Node<K> leftRotate(Node<K> x) {
-        Node<K> newRoot = new Node<K>(x.get(),x,x.right.right);
-        newRoot.parent = x.parent;
-        newRoot.left.parent = newRoot;
-        newRoot.right.parent = newRoot;
+        Node<K> k1 = x;
+        Node<K> k2 = x.left.right;
+        Node<K> k3 = x.left;
 
-        newRoot.left.left.parent = newRoot.left;
-        newRoot.left.left = x.parent;
+        //Shuffle B
+        if(x.left != null && x.left.right != null) k1.right = x.left.right.left;
+        if(k1.right != null) k1.right.parent = k1;
 
-        newRoot.left.updateHeight();
-        newRoot.right.left.updateHeight();
-        newRoot.right.right.updateHeight();
+        //Shuffle C
+        if (x.left != null && x.left.right != null) k3.left = x.left.right.right;
+        else k3.left = null;
+        if (k3.left != null) k3.left.parent = k3;
 
-        x = null;
-        return newRoot;
+        // Shuffle k2
+        if (k2 != null) k2.left = k1;
+        if(k2 != null && k1 != null) k1.parent = k2;
+        if(k2 != null) k2.right = k3;
+        if(k2 != null && k3 != null) k3.parent = k2;
+
+        if(k1.right != null) k1.right.updateHeight();
+        if(k1.left != null) k1.left.updateHeight();
+        if(k3.left != null) k3.left.updateHeight();
+        if(k3.right != null) k3.right.updateHeight();
+
+        k1.updateHeight();
+        k3.updateHeight();
+
+        updateHeightUp(k2);
+        return k2;
     }
 
     /**
